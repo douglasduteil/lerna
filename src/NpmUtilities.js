@@ -35,8 +35,8 @@ export default class NpmUtilities {
   }
 
   @logger.logifyAsync()
-  static execInDir(command, args, directory, callback) {
-    ChildProcessUtilities.exec(`npm ${command} ${escapeArgs(args)}`, { cwd: directory, env: process.env }, callback);
+  static execInDir(command, args, directory, callback, stdoutCallback, stderrCallback) {
+    ChildProcessUtilities.exec(`npm ${command} ${escapeArgs(args)}`, { cwd: directory, env: process.env }, callback, stdoutCallback, stderrCallback);
   }
 
   @logger.logifyAsync()
