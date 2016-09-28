@@ -47,18 +47,51 @@ export default class RunCommand extends Command {
   }
 
   runScriptInPackages(callback) {
-    async.parallelLimit(this.packagesWithScript.map((pkg) => (cb) => {
-      this.runScriptInPackage(pkg, cb);
+    async.parallelLimit(this.packagesWithScript.map((pkg, i) => (cb) => {
+      this.runScriptInPackage(i, pkg, cb);
     }), this.concurrency, callback);
   }
 
-  runScriptInPackage(pkg, callback) {
+  runScriptInPackage(index, pkg, callback) {
+    const prefix = `[${index}]`
     NpmUtilities.runScriptInDir(this.script, this.args, pkg.location, (err, stdout) => {
       this.logger.info(stdout);
       if (err) {
         this.logger.error(`Errored while running npm script '${this.script}' in '${pkg.name}'`, err);
       }
       callback(err);
-    });
+    },
+    log.bind(null, prefix, null),
+    logError.bind(null, prefix, null)
+    );
   }
+}
+
+function logError(prefix, prefixColor, text) {
+  // This is for now same as log, there might be separate colors for stderr
+  // and stdout
+  logWithPrefix(prefix, prefixColor, text);
+}
+
+function log(prefix, prefixColor, text) {
+  logWithPrefix(prefix, prefixColor, text);
+}
+
+function logWithPrefix(prefix, prefixColor, text, color) {
+  const lastChar = text[text.length - 1];
+
+  if (lastChar === "\n") {
+    // Remove extra newline from the end to prevent extra newlines in input
+    text = text.slice(0, text.length - 1);
+  }
+
+  const lines = text.split("\n");
+  // Do not bgColor trailing space
+  const coloredPrefix = prefix.replace(/ $/, "") + " ";
+  const paddedLines = lines.map(function(line) {
+    const coloredLine = color ? line : line;
+    return coloredPrefix + coloredLine;
+  });
+
+  console.log(paddedLines.join("\n"));
 }

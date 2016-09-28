@@ -11,7 +11,7 @@ let children = 0;
 const emitter = new EventEmitter;
 
 export default class ChildProcessUtilities {
-  static exec(command, opts, callback) {
+  static exec(command, opts, callback, stdoutCallback, stderrCallback) {
     return ChildProcessUtilities.registerChild(
       child.exec(command, opts, (err, stdout, stderr) => {
         if (err != null) {
@@ -23,11 +23,13 @@ export default class ChildProcessUtilities {
             err = `Error: ${err.message}.  Partial output follows:\n\n${stderr}`;
           }
 
-          callback(err || stderr, stdout);
+          callback(err || stderr);
         } else {
-          callback(null, stdout);
+          callback(null);
         }
-      })
+      }),
+      stdoutCallback,
+      stderrCallback
     );
   }
 
@@ -64,8 +66,18 @@ export default class ChildProcessUtilities {
     }
   }
 
-  static registerChild(child) {
+  static registerChild(child, stdoutCallback, stderrCallback) {
     children++;
+    child.stdout.on("data", (chunk) => {
+      if (stdoutCallback) {
+        stdoutCallback(chunk);
+      }
+    });
+    child.stderr.on("data", (chunk) => {
+      if (stderrCallback) {
+        stderrCallback(chunk);
+      }
+    });
     child.on("exit", () => {
       children--;
       if (children === 0) {

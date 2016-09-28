@@ -34,13 +34,13 @@ export default class NpmUtilities {
   }
 
   @logger.logifySync
-  static execInDir(command, args, directory, callback) {
-    ChildProcessUtilities.exec(`npm ${command} ${args.join(" ")}`, { cwd: directory, env: process.env }, callback);
+  static execInDir(command, args, directory, callback, stdoutCallback, stderrCallback) {
+    ChildProcessUtilities.exec(`npm ${command} ${args.join(" ")}`, { cwd: directory, env: process.env }, callback, stdoutCallback, stderrCallback);
   }
 
   @logger.logifyAsync
-  static runScriptInDir(script, args, directory, callback) {
-    NpmUtilities.execInDir(`run ${script}`, args, directory, callback);
+  static runScriptInDir(script, args, directory, callback, stdoutCallback, stderrCallback) {
+    NpmUtilities.execInDir(`run ${script}`, args, directory, callback, stdoutCallback, stderrCallback);
   }
 
   @logger.logifyAsync
