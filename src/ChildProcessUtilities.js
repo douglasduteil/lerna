@@ -68,11 +68,13 @@ export default class ChildProcessUtilities {
 
   static registerChild(child, stdoutCallback, stderrCallback) {
     children++;
-    child.stdout.on("data", (chunk) => {
-      if (stdoutCallback) {
-        stdoutCallback(chunk);
-      }
-    });
+    if (child.stdout) {
+      child.stdout.on("data", (chunk) => {
+        if (stdoutCallback) {
+          stdoutCallback(chunk);
+        }
+      });
+    }
     child.stderr.on("data", (chunk) => {
       if (stderrCallback) {
         stderrCallback(chunk);
